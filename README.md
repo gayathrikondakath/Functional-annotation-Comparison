@@ -10,11 +10,11 @@ Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapp
 
 *Input*: There is a sample input file in the file named “sample_input_converter.tsv”
 
-*Caution*: the output file does not remove redundant GO tags for unique genes.
+*Caution*: the output file does not remove redundant GO terms for unique genes.
 
 **FOR JACCARD INDEX AND NON-OVERLAPPING GO TERMS**
 
-*Description*:This code calculates the Jaccard similarity index and the number of non-overlapping Gene Ontology (GO) terms for a given dataset. It compares the GO terms derived from two types of files: one derived from BLAST and another from EggNOG/InterPro. The code provides insights into the similarity and dissimilarity of GO terms between the two sources.
+*Description*:This code calculates the Jaccard similarity index and the number of non-overlapping Gene Ontology (GO) terms for a given dataset. It compares the GO terms derived from two types of approaches: one derived from BLAST and another from EggNOG/InterPro. The code provides insights into the similarity and dissimilarity of GO terms between the two sources.
 
 *File Structure*:The code assumes that the input files are located in the specified file_path directory or its subdirectories. The files should be of two types: one derived from BLAST and the other from EggNOG/InterPro.
 
