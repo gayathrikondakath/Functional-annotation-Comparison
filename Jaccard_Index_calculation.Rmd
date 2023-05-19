@@ -40,7 +40,7 @@ DT <- rbindlist(sapply(list_of_files, fread, simplify = FALSE), use.names = TRUE
 
 sample file (or DT) = sample_input_file_comparison.xlsx
 ```{r}
-DT <- sample_input_file_comparison
+DT <- read_excel(file.choose()) #choose the sample file
 # Add information about the source of data
 DT$Source <- ifelse(grepl("INSECTA", DT$FileName), "BLAST", "Other")
 ```
@@ -88,8 +88,8 @@ unique_gene_ids1 <- unique(df1$'Seq Name')
 # Loop through each unique gene ID
 for (gene_id in unique_gene_ids1) {
   # Create subsets to store BLAST and Other values
-  BLAST_values <- df1[(df1$`Seq Name` == gene_id) & (df1$Source == "BLAST")]
-  Other_values <- df1[(df1$`Seq Name` == gene_id) & (df1$Source == "Other")]
+  BLAST_values <- df1[(df1$`Seq Name` == gene_id) & (df1$Source == "BLAST"),]
+  Other_values <- df1[(df1$`Seq Name` == gene_id) & (df1$Source == "Other"),]
   
   # Only process genes represented in both BLAST and Other
   if (!isEmpty(BLAST_values) & !isEmpty(Other_values)) {
@@ -124,8 +124,8 @@ unique_gene_ids2 <- unique(df2$'Seq Name')
 # Loop through each unique gene ID
 for (gene_id in unique_gene_ids2) {
   # Create subsets to store BLAST and Other values
-  BLAST_values <- df2[(df2$`Seq Name` == gene_id) & (df2$Source == "BLAST")]
-  Other_values <- df2[(df2$`Seq Name` == gene_id) & (df2$Source == "Other")]
+  BLAST_values <- df2[(df2$`Seq Name` == gene_id) & (df2$Source == "BLAST"),]
+  Other_values <- df2[(df2$`Seq Name` == gene_id) & (df2$Source == "Other"),]
   
   # Only process genes represented in both BLAST and Other
   if (!isEmpty(BLAST_values) & !isEmpty(Other_values)) {
@@ -159,8 +159,8 @@ unique_gene_ids3 <- unique(df3$'Seq Name')
 # Loop through each unique gene ID
 for (gene_id in unique_gene_ids3) {
   # Create subsets to store BLAST and Other values
-  BLAST_values <- df3[(df3$`Seq Name` == gene_id) & (df3$Source == "BLAST")]
-  Other_values <- df3[(df3$`Seq Name` == gene_id) & (df3$Source == "Other")]
+  BLAST_values <- df3[(df3$`Seq Name` == gene_id) & (df3$Source == "BLAST"),]
+  Other_values <- df3[(df3$`Seq Name` == gene_id) & (df3$Source == "Other"),]
   
   # Only process genes represented in both BLAST and Other
   if (!isEmpty(BLAST_values) & !isEmpty(Other_values)) {
