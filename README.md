@@ -14,8 +14,6 @@ Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapp
 
 **FOR JACCARD INDEX AND NON-OVERLAPPING GO TERMS**
 
-*Aim*: Calculate Jaccard Similarity Index and #Non-overlapping GO terms
-
 *Description*:This code calculates the Jaccard similarity index and the number of non-overlapping Gene Ontology (GO) terms for a given dataset. It compares the GO terms derived from two types of files: one derived from BLAST and another from EggNOG/InterPro. The code provides insights into the similarity and dissimilarity of GO terms between the two sources.
 
 *File Structure*:The code assumes that the input files are located in the specified file_path directory or its subdirectories. The files should be of two types: one derived from BLAST and the other from EggNOG/InterPro.
@@ -23,8 +21,6 @@ Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapp
 *Caution*: ‘AnnotationDbi’ package does not run optimally when ‘dplyr’ package is installed. 
 
 **FOR MEAN NUMBER OF GO TAGS**
-
-*Aim*: Mean Number of GO Terms
 
 *Description*: This code calculates the mean number of Gene Ontology (GO) terms for different annotation approaches, i.e. BLAST, EggNOG, and InterPro. It assumes that there are three types of input files derived from these approaches.
 
