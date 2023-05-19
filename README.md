@@ -2,7 +2,7 @@
 Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapper, and InterProScan) in their ability to assign Gene Ontology terms in two species of Insecta with differing levels of annotation, Bombyx mori and Manduca sexta. 
 
 
-**for .annot converter**
+**FOR .ANNOT CONVERTER**
 
 *Aim*: Convert into an annotated .annot file compatible with OmicsBox
 
@@ -12,7 +12,7 @@ Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapp
 
 *Caution*: the outfile file does not remove redundant GO tags for unique genes.
 
-**for Jaccard Index and non-overlapping GO terms**
+**FOR JACCARD INDEX AND NON-OVERLAPPING GO TERMS**
 
 *Aim*: Calculate Jaccard Similarity Index and #Non-overlapping GO terms
 
@@ -22,7 +22,7 @@ Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapp
 
 *Caution*: ‘AnnotationDbi’ package does not run optimally when ‘dplyr’ package is installed. 
 
-**for Mean Number of GO tags**
+**FOR MEAN NUMBER OF GO TAGS**
 
 *Aim*: Mean Number of GO Terms
 
