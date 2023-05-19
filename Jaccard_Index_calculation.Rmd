@@ -39,6 +39,7 @@ DT <- rbindlist(sapply(list_of_files, fread, simplify = FALSE), use.names = TRUE
 
 sample file (or DT) = sample_input_file_comparison.xlsx
 ```{r}
+DT <- sample_input_file_comparison
 # Add information about the source of data
 DT$Source <- ifelse(grepl("INSECTA", DT$FileName), "BLAST", "Other")
 ```
