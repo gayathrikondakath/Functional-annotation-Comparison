@@ -17,6 +17,7 @@ dataf <- rbindlist(sapply(list_of_files, fread, simplify = FALSE), use.names = T
 
 DATA PROCESSING CHUNK: sample file (or dataf) = sample_input_file_comparison.xlsx
 ```{r}
+dataf <- sample_input_file_comparison
 # Add information about the source of data (here filename has annotation type)
 dataf$Source <- ifelse(grepl("INSECTA", data$FileName), "BLAST", 
                     ifelse(grepl("EGGNOG", data$FileName), "EggNOG", "InterPro"))
