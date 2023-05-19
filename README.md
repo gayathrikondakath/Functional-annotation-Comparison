@@ -23,6 +23,7 @@ Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapp
 *Caution*: ‘AnnotationDbi’ package does not run optimally when ‘dplyr’ package is installed. 
 
 **for Mean Number of GO tags**
+
 *Aim*: Mean Number of GO Terms
 
 *Description*: This code calculates the mean number of Gene Ontology (GO) terms for different annotation approaches, i.e. BLAST, EggNOG, and InterPro. It assumes that there are three types of input files derived from these approaches.
