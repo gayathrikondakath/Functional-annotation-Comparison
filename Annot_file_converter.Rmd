@@ -1,0 +1,53 @@
+---
+title: "Convert into an annotated .annot file compatible with OmicsBox"
+output: html_notebook
+---
+```{r}
+library(readxl)
+library(writexl)
+library(readr)
+```
+
+Input the file into the code
+```{r}
+# Choose input file with gene ID and GO tags (sample file= sample_input_converter)
+input_file <- file.choose()
+
+# Read and convert the input data to a dataframe
+input_df <- read_tsv(input_file)
+```
+
+This section filters the input file based on species that need to be included/excluded
+```{r}
+# Exclude rows with "mori" in the Species column (e.g., Bombyx)
+filtered_df <- input_df[!grepl("mori", input_df$Species), ]
+#filtered_df <- filtered_df[, 1:(length(filtered_df) - 2)]
+
+# Create a new dataframe with E scores <= 1e-5 and disregarding pass/fail status
+filtered_pass_df <- filtered_df[filtered_df$E_score <= 1.00e-5,]
+
+# Split the dataframe based on Gene_ID and store each subset in a list
+GOterms_genes <- split(filtered_pass_df, f = filtered_pass_df$Gene_ID)
+
+# Convert each subset in the list to a dataframe containing only the GO terms
+GOterms_df <- lapply(GOterms_genes, function(x) data.frame(x["GO_Tag"]))
+
+# Create a new output dataframe with the required size
+output_df <- data.frame(matrix(ncol = 2, nrow = length(GOterms_df)))
+colnames(output_df) <- c("Gene_ID", "GO_terms")
+
+# Fill in the output dataframe with gene IDs and their associated GO terms separated by comma
+output_df$Gene_ID <- names(GOterms_df)
+output_df$GO_terms <- unlist(lapply(GOterms_df, function(x) paste(unlist(x), collapse = ", ")))
+```
+
+```{r}
+# Prompt to save the output file as csv file
+write_csv(output_df, file.choose(new = TRUE))
+```
+
+```{r}
+# Save as .annot file compatible with OmicsBox (remember to add .annot while saving)
+mat <- as.matrix(output_df)
+write.table(mat, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE, file = file.choose(new = TRUE))
+```
