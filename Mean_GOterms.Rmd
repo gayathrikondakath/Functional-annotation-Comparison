@@ -17,7 +17,7 @@ dataf <- rbindlist(sapply(list_of_files, fread, simplify = FALSE), use.names = T
 
 DATA PROCESSING CHUNK: sample file (or dataf) = sample_input_file_comparison.xlsx
 ```{r}
-dataf <- sample_input_file_comparison
+dataf <- read_excel(file.choose()) #choose sample file here
 # Add information about the source of data (here filename has annotation type)
 dataf$Source <- ifelse(grepl("INSECTA", data$FileName), "BLAST", 
                     ifelse(grepl("EGGNOG", data$FileName), "EggNOG", "InterPro"))
@@ -87,7 +87,7 @@ write_xlsx(GOtags_count, file.choose(new=TRUE))
 STITCH FILES OF DIFFERENT SPECIES
 ```{r}
 #Load and compile excel sheets of Bombyx and Manduca
-tog <- rbind.data.frame(Bombyx_GOtags,Manduca_GOtags)
+#Species_combined <- rbind.data.frame(Bombyx_GOtags,Manduca_GOtags)
 ```
 
 CALCULATE AVERAGE NUMBER OF TERMS ASSIGNED IN EACH CATEGORY
