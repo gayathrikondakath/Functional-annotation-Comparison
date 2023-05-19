@@ -10,7 +10,7 @@ Code snippets to compare three functional annotation methods (BLAST, eggNOG-Mapp
 
 *Input*: There is a sample input file in the file named “sample_input_converter.tsv”
 
-*Caution*: the outfile file does not remove redundant GO tags for unique genes.
+*Caution*: the output file does not remove redundant GO tags for unique genes.
 
 **FOR JACCARD INDEX AND NON-OVERLAPPING GO TERMS**
 
