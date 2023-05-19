@@ -1,0 +1,200 @@
+---
+title: "Calculate Jaccard similarity Index and #Non-overlapping GO terms"
+output: html_notebook
+---
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("GO.db")
+```
+
+```{r}
+library(gplots)
+library(data.table)
+#library(dplyr) (DONT LOAD DPLYR WHEN YOU RUN THIS CODE)
+library(GO.db) #(https://bioconductor.org/packages/release/data/annotation/html/GO.db.html)
+library(writexl)
+library(AnnotationDbi)
+```
+
+FILE INPUT CHUNK:  this file should have only two types of files, other derived from BLAST and another from EggNOG/InterPro
+```{r}
+# Input the location of the file
+# Note: Use double backslashes (\\) in Windows computers for the file path
+
+file_path <- "/Volumes/as_rsch_trimmerlab_molecular01$/RNAseq2022/Method Comparison"
+
+# Get a list of files in the specified directory and its subdirectories
+list_of_files <- list.files(path = file_path, recursive = TRUE, full.names = TRUE)
+```
+
+READING & PROCESSING THE FILE:
+```{r}
+# Read all the files and create a data table (DT) with a FileName column to store filenames
+#library(data.table)
+DT <- rbindlist(sapply(list_of_files, fread, simplify = FALSE), use.names = TRUE, idcol = "FileName")
+```
+
+sample file (or DT) = sample_input_file_comparison.xlsx
+```{r}
+# Add information about the source of data
+DT$Source <- ifelse(grepl("INSECTA", DT$FileName), "BLAST", "Other")
+```
+
+```{r}
+# Find the ontology corresponding to each GOId from the GO.db library
+#library(AnnotationDbi)
+go_data <- data.frame(select(GO.db, keys = DT$GO, keytype = "GOID", columns = c("ONTOLOGY")))
+DT$Ontology <- go_data$ONTOLOGY
+```
+
+```{r}
+# Make a subset dataframe with Level 3
+DT_mod <- DT[DT$Level == 3, ]
+
+# Make subsets with Ontology: CC, MF, BP
+DT_mod_CC <- DT_mod[DT_mod$Ontology == "CC", ]
+DT_mod_MF <- DT_mod[DT_mod$Ontology == "MF", ]
+DT_mod_BP <- DT_mod[DT_mod$Ontology == "BP", ]
+```
+
+```{r}
+# Define a function to plot Venn diagrams
+venn_source <- function(df) {
+  venn(lapply(split(df, df$Source), function(x) as.list(unique(x$'Seq Name'))))
+}
+
+# Make Venn diagrams
+venn_source(DT_mod)
+venn_source(DT_mod_BP)
+venn_source(DT_mod_MF)
+venn_source(DT_mod_CC)
+```
+
+MAIN CALCULATION CHUNK: Jaccard Similarity Index and #Non-overlapping GO terms are coded here
+```{r}
+df1 <- DT_mod_BP  # Original dataframe
+onto1 <- "BP"  # Ontology type
+GO_overlap1 <- data.frame(col1 = c(), col2 = c(), stringsAsFactors = FALSE)  # Data frame to store gene IDs and Jaccard similarity
+diff_data1 <- data.frame(matrix(ncol = 6, nrow = 0))  # Data frame to store detailed results
+
+# Get unique gene IDs
+unique_gene_ids1 <- unique(df1$'Seq Name')
+
+# Loop through each unique gene ID
+for (gene_id in unique_gene_ids1) {
+  # Create subsets to store BLAST and Other values
+  BLAST_values <- df1[(df1$`Seq Name` == gene_id) & (df1$Source == "BLAST")]
+  Other_values <- df1[(df1$`Seq Name` == gene_id) & (df1$Source == "Other")]
+  
+  # Only process genes represented in both BLAST and Other
+  if (!isEmpty(BLAST_values) & !isEmpty(Other_values)) {
+    # Calculate the intersection and union of the sets
+    int_set <- intersect(BLAST_values$GO, Other_values$GO)
+    uni_set <- union(BLAST_values$GO, Other_values$GO)
+    
+    # Calculate the number of extra tags in each source
+    BLAST_diff <- length(unique(BLAST_values$GO)) - length(int_set)
+    other_diff <- length(unique(Other_values$GO)) - length(int_set)
+    
+    # Calculate Jaccard similarity
+    jaccard_sim <- length(int_set) / length(uni_set)
+    diff_data1 <- rbind(diff_data1, list(onto1, gene_id, other_diff, BLAST_diff, length(int_set), jaccard_sim))
+  
+    # Add gene ID and corresponding Jaccard similarity to the output dataframe
+    GO_overlap1 <- rbind(GO_overlap1, list(gene_id, jaccard_sim, onto1))
+    colnames(GO_overlap1) <- c('gene_id', 'Jaccard_index', 'Ontology')
+    colnames(diff_data1) <- c("ontology", "Gene", "other_diff", "BLAST_diff", "intersection")
+  }
+}
+
+# Repeat the above steps for other ontologies (MF and CC)
+df2 <- DT_mod_MF  # Original dataframe
+onto2 <- "MF"  # Ontology type
+GO_overlap2 <- data.frame(col1 = c(), col2 = c(), stringsAsFactors = FALSE)  # Data frame to store gene IDs and Jaccard similarity
+diff_data2 <- data.frame(matrix(ncol = 6, nrow = 0))  # Data frame to store detailed results
+
+# Get unique gene IDs
+unique_gene_ids2 <- unique(df2$'Seq Name')
+
+# Loop through each unique gene ID
+for (gene_id in unique_gene_ids2) {
+  # Create subsets to store BLAST and Other values
+  BLAST_values <- df2[(df2$`Seq Name` == gene_id) & (df2$Source == "BLAST")]
+  Other_values <- df2[(df2$`Seq Name` == gene_id) & (df2$Source == "Other")]
+  
+  # Only process genes represented in both BLAST and Other
+  if (!isEmpty(BLAST_values) & !isEmpty(Other_values)) {
+    # Calculate the intersection and union of the sets
+    int_set <- intersect(BLAST_values$GO, Other_values$GO)
+    uni_set <- union(BLAST_values$GO, Other_values$GO)
+    
+    # Calculate the number of extra tags in each source
+    BLAST_diff <- length(unique(BLAST_values$GO)) - length(int_set)
+    other_diff <- length(unique(Other_values$GO)) - length(int_set)
+    
+    # Calculate Jaccard similarity
+    jaccard_sim <- length(int_set) / length(uni_set)
+    diff_data2 <- rbind(diff_data2, list(onto2, gene_id, other_diff, BLAST_diff, length(int_set), jaccard_sim))
+  
+    # Add gene ID and corresponding Jaccard similarity to the output dataframe
+    GO_overlap2 <- rbind(GO_overlap2, list(gene_id, jaccard_sim, onto2))
+    colnames(GO_overlap2) <- c('gene_id', 'Jaccard_index', 'Ontology')
+    colnames(diff_data2) <- c("ontology", "Gene", "other_diff", "BLAST_diff", "intersection")
+  }
+}
+
+df3 <- DT_mod_CC  # Original dataframe
+onto3 <- "CC"  # Ontology type
+GO_overlap3 <- data.frame(col1 = c(), col2 = c(), stringsAsFactors = FALSE)  # Data frame to store gene IDs and Jaccard similarity
+diff_data3 <- data.frame(matrix(ncol = 6, nrow = 0))  # Data frame to store detailed results
+
+# Get unique gene IDs
+unique_gene_ids3 <- unique(df3$'Seq Name')
+
+# Loop through each unique gene ID
+for (gene_id in unique_gene_ids3) {
+  # Create subsets to store BLAST and Other values
+  BLAST_values <- df3[(df3$`Seq Name` == gene_id) & (df3$Source == "BLAST")]
+  Other_values <- df3[(df3$`Seq Name` == gene_id) & (df3$Source == "Other")]
+  
+  # Only process genes represented in both BLAST and Other
+  if (!isEmpty(BLAST_values) & !isEmpty(Other_values)) {
+    # Calculate the intersection and union of the sets
+    int_set <- intersect(BLAST_values$GO, Other_values$GO)
+    uni_set <- union(BLAST_values$GO, Other_values$GO)
+    
+    # Calculate the number of extra tags in each source
+    BLAST_diff <- length(unique(BLAST_values$GO)) - length(int_set)
+    other_diff <- length(unique(Other_values$GO)) - length(int_set)
+    
+    # Calculate Jaccard similarity
+    jaccard_sim <- length(int_set) / length(uni_set)
+    diff_data3 <- rbind(diff_data3, list(onto3, gene_id, other_diff, BLAST_diff, length(int_set), jaccard_sim))
+  
+    # Add gene ID and corresponding Jaccard similarity to the output dataframe
+    GO_overlap3 <- rbind(GO_overlap3, list(gene_id, jaccard_sim, onto3))
+    colnames(GO_overlap3) <- c('gene_id', 'Jaccard_index', 'Ontology')
+    colnames(diff_data3) <- c("ontology", "Gene", "other_diff", "BLAST_diff", "intersection")
+  }
+}
+```
+
+```{r}
+# Combine the results from all ontologies
+GO_overlap <- rbind.data.frame(GO_overlap1, GO_overlap2, GO_overlap3)
+GO_overlap["Type"] <- "" #EggNOG or InterPro
+diff_final <- rbind.data.frame(diff_data1, diff_data2, diff_data3)
+colnames(diff_final) <- c("ontology", "Gene", "other_extra", "BLAST_extra", "intersection", "jaccard_index")
+```
+
+```{r}
+# Plot the Jaccard similarity
+library(ggplot2)
+overlap_plot <- ggplot(GO_overlap, aes(x = Ontology, y = Jaccard_index)) + 
+  geom_violin() + geom_boxplot(width = 0.05) + labs(title = "BLAST Vs EggNOG")
+overlap_plot
+```
+

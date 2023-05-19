@@ -1,0 +1,98 @@
+---
+title: "Mean number of GO terms"
+output: html_notebook
+---
+
+FILE INPUT CHUNK:  this file should have THREE types of files, derived from BLAST, EggNOG and InterPro
+```{r}
+# Input the location of the file
+# Use double backslashes in Windows computers in the address
+list_of_files <- list.files(path = "R:\\RNAseq2022\\Method Comparison", recursive = TRUE, full.names = TRUE)
+```
+
+```{r}
+# Read all the files and create a FileName column to store filenames
+dataf <- rbindlist(sapply(list_of_files, fread, simplify = FALSE), use.names = TRUE, idcol = "FileName")
+```
+
+DATA PROCESSING CHUNK: sample file (or dataf) = sample_input_file_comparison.xlsx
+```{r}
+# Add information about the source of data (here filename has annotation type)
+dataf$Source <- ifelse(grepl("INSECTA", data$FileName), "BLAST", 
+                    ifelse(grepl("EGGNOG", data$FileName), "EggNOG", "InterPro"))
+```
+
+```{r}
+# Filter the data to include only Level 3
+filtered_data <- dataf[dataf$Level == 3,]
+
+# Separate the data based on source
+eggnog_data <- filtered_data[filtered_data$Source == "EggNOG",]
+BLAST_data <- filtered_data[filtered_data$Source == "BLAST",]
+interpro_data <- filtered_data[filtered_data$Source == "InterPro",]
+
+# Split the data by gene name
+GOtags_genes1 <- split(eggnog_data, f = eggnog_data$`Seq Name`)
+GOtags_genes2 <- split(BLAST_data, f = BLAST_data$`Seq Name`)
+GOtags_genes3 <- split(interpro_data, f = interpro_data$`Seq Name`)
+```
+
+```{r}
+# Count the number of unique GO tags for each type of approach - EggNOG
+GO_eggNOG <- data.frame(matrix(ncol = 2, nrow = 0))
+for (gene_type in GOtags_genes1) {
+  Gene_ID <- gene_type$`Seq Name`[1]
+  Gotags_number <- length(unique(gene_type$GO))
+  GO_eggNOG <- rbind(GO_eggNOG, list(Gene_ID, Gotags_number))
+  colnames(GO_eggNOG) <- c('gene_id', '#GO tags')
+}
+GO_eggNOG["Type"] <- "EggNOG"
+
+# Count the number of unique GO tags for each type of approach - BLAST
+GO_BLAST <- data.frame(matrix(ncol = 2, nrow = 0))
+for (gene_type in GOtags_genes2) {
+  Gene_ID <- gene_type$`Seq Name`[1]
+  Gotags_number <- length(unique(gene_type$GO))
+  GO_BLAST <- rbind(GO_BLAST, list(Gene_ID, Gotags_number))
+  colnames(GO_BLAST) <- c('gene_id', '#GO tags')
+}
+GO_BLAST["Type"] <- "BLAST"
+
+# Count the number of unique GO tags for each type of approach - InterPro
+GO_interpro <- data.frame(matrix(ncol = 2, nrow = 0))
+for (gene_type in GOtags_genes3) {
+  Gene_ID <- gene_type$`Seq Name`[1]
+  Gotags_number <- length(unique(gene_type$GO))
+  GO_interpro <- rbind(GO_interpro, list(Gene_ID, Gotags_number))
+  colnames(GO_interpro) <- c('gene_id', '#GO tags')
+}
+GO_interpro["Type"] <- "InterPro"
+```
+
+```{r}
+# Combine the counts for all approaches
+GOtags_count <- rbind.data.frame(GO_eggNOG, GO_insecta, GO_interpro)
+#Include Species name (Manduca/Bombyx)
+GOtags_count["Species"] <- "Bombyx"
+```
+
+SAVE THE PROCESSED FILE:
+```{r}
+# Write the data to an Excel file
+library(writexl)
+write_xlsx(GOtags_count, file.choose(new=TRUE))
+```
+
+STITCH FILES OF DIFFERENT SPECIES
+```{r}
+#Load and compile excel sheets of Bombyx and Manduca
+tog <- rbind.data.frame(Bombyx_GOtags,Manduca_GOtags)
+```
+
+CALCULATE AVERAGE NUMBER OF TERMS ASSIGNED IN EACH CATEGORY
+```{r}
+#Average number of GO tags
+mean_GOtags <- aggregate(`#GO tags` ~ Species + Type,data=GOtags_count,FUN=function(x) mean(x))
+colnames(mean_GOtags)<- c("Species","Annotation Type","#GOtags")
+```
+
