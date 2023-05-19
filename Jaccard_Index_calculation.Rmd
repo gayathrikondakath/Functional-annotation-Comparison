@@ -16,6 +16,7 @@ library(data.table)
 #library(dplyr) (DONT LOAD DPLYR WHEN YOU RUN THIS CODE)
 library(GO.db) #(https://bioconductor.org/packages/release/data/annotation/html/GO.db.html)
 library(writexl)
+library(readxl)
 library(AnnotationDbi)
 ```
 
